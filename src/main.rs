@@ -3,6 +3,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 
+use clap::ArgAction;
 use clap::Command;
 use clap::{Arg};
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
@@ -24,10 +25,17 @@ fn main() {
                 .help("Sets the input image file")
                 .required(true),
         )
+        .arg(
+            Arg::new("reshade-preset")
+                .long("reshade-preset")
+                .action(ArgAction::SetTrue)
+                .help("Create a ReShade preset file"),
+        )
         .get_matches();
 
     let dir_path = matches.get_one::<String>("directory").unwrap();
     let lut_image_path = matches.get_one::<String>("image").unwrap();
+    let reshade_preset = matches.get_one::<bool>("reshade-preset").unwrap();
 
     let lut_image = match image::open(lut_image_path) {
         Ok(img) => img,
@@ -76,6 +84,16 @@ fn main() {
             let output_path = path.with_extension("png");
             if let Err(e) = output_image.save(&output_path) {
                 eprintln!("Error saving output image {}: {}", output_path.display(), e);
+            }
+            if *reshade_preset {
+                let ini_path = path.with_extension("ini");
+                let lut_name = output_path.file_name().unwrap().to_str().unwrap();
+                let ini_content = format!(
+                    "PreprocessorDefinitions=fLUT_TextureName=\"{lut_name}\"\nTechniques=LUT@LUT.fx"
+                );
+                if let Err(e) = fs::write(ini_path, ini_content) {
+                    eprintln!("Error writing ReShade preset file: {}", e);
+                }
             }
         }
     }
