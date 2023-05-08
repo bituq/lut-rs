@@ -15,21 +15,7 @@ fn main() {
     let dir_path = &args[1];
     let lut_image_path = &args[2];
 
-    let mut buffer = Vec::new();
-    match File::open(lut_image_path) {
-        Ok(mut file) => {
-            if let Err(e) = file.read_to_end(&mut buffer) {
-                eprintln!("Error reading PNG file: {}", e);
-                return;
-            }
-        }
-        Err(e) => {
-            eprintln!("Error opening PNG file: {}", e);
-            return;
-        }
-    }
-
-    let lut_image = match image::load_from_memory(&buffer) {
+    let lut_image = match image::open(lut_image_path) {
         Ok(img) => img,
         Err(e) => {
             eprintln!("Error decoding PNG file: {}", e);
