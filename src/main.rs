@@ -1,21 +1,38 @@
 use std::env;
 use std::fs;
+use std::fs::File;
+use std::io::Read;
 
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        eprintln!("Usage: {} <directory>", args[0]);
+    if args.len() != 3 {
+        eprintln!("Usage: {} <directory> <image>", args[0]);
         return;
     }
 
     let dir_path = &args[1];
+    let lut_image_path = &args[2];
 
-    let lut_image = match image::load_from_memory(include_bytes!("../lut.png")) {
+    let mut buffer = Vec::new();
+    match File::open(lut_image_path) {
+        Ok(mut file) => {
+            if let Err(e) = file.read_to_end(&mut buffer) {
+                eprintln!("Error reading PNG file: {}", e);
+                return;
+            }
+        }
+        Err(e) => {
+            eprintln!("Error opening PNG file: {}", e);
+            return;
+        }
+    }
+
+    let lut_image = match image::load_from_memory(&buffer) {
         Ok(img) => img,
         Err(e) => {
-            eprintln!("Error opening LUT PNG file: {}", e);
+            eprintln!("Error decoding PNG file: {}", e);
             return;
         }
     };
