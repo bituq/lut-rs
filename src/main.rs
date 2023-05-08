@@ -3,17 +3,31 @@ use std::fs;
 use std::fs::File;
 use std::io::Read;
 
+use clap::Command;
+use clap::{Arg};
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 3 {
-        eprintln!("Usage: {} <directory> <image>", args[0]);
-        return;
-    }
+    let matches = Command::new("LUT Image Processor")
+        .version("1.0")
+        .author("Dylan N <zealbus@outlook.com>")
+        .about("Applies LUTs from .cube files to images")
+        .arg(
+            Arg::new("directory")
+                .value_name("DIRECTORY")
+                .help("Sets the directory containing .cube files")
+                .required(true),
+        )
+        .arg(
+            Arg::new("image")
+                .value_name("IMAGE")
+                .help("Sets the input image file")
+                .required(true),
+        )
+        .get_matches();
 
-    let dir_path = &args[1];
-    let lut_image_path = &args[2];
+    let dir_path = matches.get_one::<String>("directory").unwrap();
+    let lut_image_path = matches.get_one::<String>("image").unwrap();
 
     let lut_image = match image::open(lut_image_path) {
         Ok(img) => img,
