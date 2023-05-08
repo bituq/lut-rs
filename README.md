@@ -24,7 +24,7 @@ Replace `<DIRECTORY>` with the path to the directory containing `.cube` files, a
 ## Example
 
 ```
-./target/release/lut-rs --directory ./cube_files --image ./input.png --reshade-preset
+./target/release/lut-rs --directory ./cube_files --image ./lut.png --reshade-preset
 ```
 
 This will apply LUTs from all `.cube` files in the `./cube_files` directory to the `./lut.png` image and generate ReShade preset files for each entry.
