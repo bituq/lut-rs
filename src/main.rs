@@ -1,7 +1,4 @@
-use std::env;
 use std::fs;
-use std::fs::File;
-use std::io::Read;
 
 use clap::ArgAction;
 use clap::Command;
@@ -53,15 +50,7 @@ fn main() {
         }
     };
 
-    for entry in entries {
-        let entry = match entry {
-            Ok(entry) => entry,
-            Err(e) => {
-                eprintln!("Error reading directory entry: {}", e);
-                continue;
-            }
-        };
-
+    for entry in entries.filter_map(Result::ok) {
         let path = entry.path();
         if path.extension() == Some(std::ffi::OsStr::new("cube")) {
             let cube_file = match fs::read_to_string(&path) {
