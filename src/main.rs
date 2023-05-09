@@ -1,9 +1,12 @@
-use std::fs;
+mod lib;
 
+use std::fs;
 use clap::ArgAction;
 use clap::Command;
 use clap::{Arg};
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
+use lib::cube::parse_cube_file;
+use crate::lib::cube;
 
 fn main() {
     let matches = Command::new("LUT Image Processor")
@@ -64,7 +67,7 @@ fn main() {
             let (lut, lut_size) = match parse_cube_file(&cube_file) {
                 Ok(result) => result,
                 Err(e) => {
-                    eprintln!("Error parsing .cube file {}: {}", path.display(), e);
+                    eprintln!("Error parsing .cube file {}: {:?}", path.display(), e);
                     continue;
                 }
             };
@@ -86,41 +89,6 @@ fn main() {
             }
         }
     }
-}
-
-fn parse_cube_file(cube_file: &str) -> Result<(Vec<[u8; 3]>, usize), &'static str> {
-    // Parse the .cube file and return a LUT as a vector of [u8; 3]
-    // This is a simplified parser that assumes the .cube file has a valid format
-    let mut lut = Vec::new();
-    let mut lut_size: Option<usize> = None;
-
-    for line in cube_file.lines() {
-        if line.starts_with('#') || line.trim().is_empty() {
-            continue;
-        }
-
-        let values: Vec<&str> = line.split_whitespace().collect();
-
-        if values.len() == 2 && values[0] == "LUT_3D_SIZE" {
-            lut_size = Some(values[1].parse::<usize>().unwrap_or(0));
-        } else if values.len() == 3 {
-            let r = (values[0].parse::<f32>().unwrap_or(0.0) * 255.0).round() as u8;
-            let g = (values[1].parse::<f32>().unwrap_or(0.0) * 255.0).round() as u8;
-            let b = (values[2].parse::<f32>().unwrap_or(0.0) * 255.0).round() as u8;
-            lut.push([r, g, b]);
-        }
-    }
-
-    
-    if let Some(size) = lut_size {
-        if lut.len() != size.pow(3) {
-            return Err("Invalid LUT size");
-        }
-    } else {
-        return Err("LUT_3D_SIZE not found");
-    }
-
-    Ok((lut, lut_size.unwrap()))
 }
 
 fn clamp_and_scale(value: u8, lut_size: usize) -> u32 {
