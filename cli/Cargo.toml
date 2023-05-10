@@ -1,10 +1,15 @@
 [package]
-name = "lut-rs"
+name = "lut_rs_cli"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+lut_rs = { path = "../core" }
 clap = "4.2.2"
 image = "0.24.6"
+
+[[bin]]
+name = "lut-rs-cli"
+path = "src/main.rs"

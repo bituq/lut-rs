@@ -1,3 +1,1 @@
-/target
-/cube_files/*.png
-/cube_files/*.ini
+**/target
