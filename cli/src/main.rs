@@ -3,8 +3,9 @@ use clap::ArgAction;
 use clap::Command;
 use clap::{Arg};
 use image::{DynamicImage, GenericImageView, ImageBuffer, Rgb};
-use lut_rs::apply_lut;
 use lut_rs::cube::parse_cube_file;
+use lut_rs::lut::Lut;
+use lut_rs::lut::apply_lut;
 
 fn main() {
     let matches = Command::new("LUT Image Processor")
@@ -70,11 +71,22 @@ fn main() {
                 }
             };
 
-            let output_image = apply_lut(&lut_image, &lut, lut_size);
+            let output_image_result = apply_lut(&lut_image, &Lut::new(lut));
             let output_path = path.with_extension("png");
-            if let Err(e) = output_image.save(&output_path) {
-                eprintln!("Error saving output image {}: {}", output_path.display(), e);
+
+            // Handle the Result from apply_lut
+            match output_image_result {
+                Ok(output_image) => {
+                    if let Err(e) = output_image.save(&output_path) {
+                        eprintln!("Error saving output image {}: {}", output_path.display(), e);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Error applying LUT to image: {}", e);
+                    continue;
+                }
             }
+            
             if *reshade_preset {
                 let ini_path = path.with_extension("ini");
                 let lut_name = output_path.file_name().unwrap().to_str().unwrap();
